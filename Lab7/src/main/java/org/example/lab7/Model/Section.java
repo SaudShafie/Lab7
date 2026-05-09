@@ -5,25 +5,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-
 @Data
 @NoArgsConstructor
 public class Section {
     @NotEmpty
     @Size(min = 2)
     private String id;
-    private ArrayList<String> studentIds = new ArrayList<>();
 
-    public ArrayList<String> getStudentIds() {
-        if (studentIds==null)studentIds=new ArrayList<>();
-        return studentIds;
-    }
-
-    public void addStudentId(String id) {
-        if (studentIds==null)studentIds=new ArrayList<>();
-
-        studentIds.add(id);
-    }
-
+    /** Owning side: at most one student in this section. */
+    private String studentId;
 }

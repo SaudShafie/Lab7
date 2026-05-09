@@ -1,13 +1,17 @@
 package org.example.lab7.Service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.lab7.Model.Class;
+import org.example.lab7.Model.Student;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
 @Service
+@RequiredArgsConstructor
 public class ClassService {
     private final ArrayList<Class> classes = new ArrayList<>();
+    private final StudentService studentService;
 
     public ArrayList<Class> getAllClasses() {
         return classes;
@@ -26,7 +30,6 @@ public class ClassService {
         if (getClassById(schoolClass.getId()) != null) {
             return false;
         }
-        schoolClass.refreshStudentCount();
         classes.add(schoolClass);
         return true;
     }
@@ -35,7 +38,6 @@ public class ClassService {
         for (int i = 0; i < classes.size(); i++) {
             if (classes.get(i).getId().equals(id)) {
                 schoolClass.setId(id);
-                schoolClass.refreshStudentCount();
                 classes.set(i, schoolClass);
                 return true;
             }
@@ -46,6 +48,11 @@ public class ClassService {
     public boolean deleteClass(String id) {
         for (int i = 0; i < classes.size(); i++) {
             if (classes.get(i).getId().equals(id)) {
+                for (Student s : studentService.getAllStudents()) {
+                    if (java.util.Objects.equals(s.getClassId(), id)) {
+                        s.setClassId(null);
+                    }
+                }
                 classes.remove(i);
                 return true;
             }
@@ -63,28 +70,21 @@ public class ClassService {
         return result;
     }
 
+    /** Student owns {@link Student#getClassId()}; resolves at most one class. */
     public ArrayList<Class> getClassesByStudentId(String studentId) {
         ArrayList<Class> result = new ArrayList<>();
-        for (Class schoolClass : classes) {
-            if (schoolClass.getStudentIds().contains(studentId)) {
-                result.add(schoolClass);
-            }
+        Student student = studentService.getStudentById(studentId);
+        if (student == null) {
+            return result;
+        }
+        String cid = student.getClassId();
+        if (cid == null || cid.isBlank()) {
+            return result;
+        }
+        Class schoolClass = getClassById(cid);
+        if (schoolClass != null) {
+            result.add(schoolClass);
         }
         return result;
-    }
-
-    public boolean addStudentToClass(String classId, String studentId) {
-        Class schoolClass = getClassById(classId);
-if (schoolClass==null) return false;
-        schoolClass.addStudentId(studentId);
-        return true;
-    }
-
-    public boolean removeStudentFromClass(String classId, String studentId) {
-        Class schoolClass = getClassById(classId);
-        if (schoolClass == null) {
-            return false;
-        }
-        return schoolClass.removeStudentId(studentId);
     }
 }

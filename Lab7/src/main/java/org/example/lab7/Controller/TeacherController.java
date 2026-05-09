@@ -10,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-
 @RestController
 @RequestMapping("/api/v1/teachers")
 @RequiredArgsConstructor
@@ -72,6 +70,12 @@ public class TeacherController {
     @GetMapping("/filter-teachers-by-min-salary/{minSalary}")
     public ResponseEntity<?> getTeachersByMinSalary(@PathVariable double minSalary) {
         return ResponseEntity.status(200).body(teacherService.getTeachersByMinSalary(minSalary));
+    }
+
+    /** Teachers with no section assignment (staffing gaps). */
+    @GetMapping("/without-section")
+    public ResponseEntity<?> getTeachersWithoutSection() {
+        return ResponseEntity.status(200).body(teacherService.getTeachersWithoutSection());
     }
 
     @GetMapping("/get-teachers-by-section/{sectionId}")

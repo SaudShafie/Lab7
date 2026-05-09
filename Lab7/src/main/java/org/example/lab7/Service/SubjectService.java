@@ -74,7 +74,7 @@ public class SubjectService {
     public ArrayList<Subject> getSubjectsByStudentId(String studentId) {
         ArrayList<Subject> result = new ArrayList<>();
         for (Subject subject : subjects) {
-            if (subject.getStudentId().equals(studentId)) {
+            if (java.util.Objects.equals(subject.getStudentId(), studentId)) {
                 result.add(subject);
             }
         }

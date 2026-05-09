@@ -1,13 +1,16 @@
 package org.example.lab7.Service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.lab7.Model.Section;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
 @Service
+@RequiredArgsConstructor
 public class SectionService {
     private final ArrayList<Section> sections = new ArrayList<>();
+    private final TeacherService teacherService;
 
     public ArrayList<Section> getAllSections() {
         return sections;
@@ -44,6 +47,7 @@ public class SectionService {
     public boolean deleteSection(String id) {
         for (int i = 0; i < sections.size(); i++) {
             if (sections.get(i).getId().equals(id)) {
+                teacherService.clearSectionIdReferences(id);
                 sections.remove(i);
                 return true;
             }
@@ -54,21 +58,25 @@ public class SectionService {
     public ArrayList<Section> getSectionsByStudentId(String studentId) {
         ArrayList<Section> result = new ArrayList<>();
         for (Section section : sections) {
-            if (section.getStudentIds().contains(studentId)) {
+            if (java.util.Objects.equals(section.getStudentId(), studentId)) {
                 result.add(section);
             }
         }
         return result;
     }
 
+    /** Section owns {@link Section#getStudentId()}; student appears in at most one section. */
     public boolean addStudentToSection(String sectionId, String studentId) {
         Section section = getSectionById(sectionId);
         if (section == null) {
             return false;
         }
-        if (!section.getStudentIds().contains(studentId)) {
-            section.addStudentId(studentId);
+        for (Section s : sections) {
+            if (java.util.Objects.equals(s.getStudentId(), studentId)) {
+                s.setStudentId(null);
+            }
         }
+        section.setStudentId(studentId);
         return true;
     }
 
@@ -77,7 +85,11 @@ public class SectionService {
         if (section == null) {
             return false;
         }
-        return section.getStudentIds().remove(studentId);
+        if (!java.util.Objects.equals(section.getStudentId(), studentId)) {
+            return false;
+        }
+        section.setStudentId(null);
+        return true;
     }
 
     public int getStudentCountInSection(String sectionId) {
@@ -85,6 +97,15 @@ public class SectionService {
         if (section == null) {
             return -1;
         }
-        return section.getStudentIds().size();
+        String sid = section.getStudentId();
+        return (sid == null || sid.isBlank()) ? 0 : 1;
+    }
+
+    public void removeStudentFromAllSections(String studentId) {
+        for (Section section : sections) {
+            if (java.util.Objects.equals(section.getStudentId(), studentId)) {
+                section.setStudentId(null);
+            }
+        }
     }
 }

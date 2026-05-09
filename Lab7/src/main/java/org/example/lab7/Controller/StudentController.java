@@ -76,6 +76,12 @@ public class StudentController {
         return ResponseEntity.status(200).body(studentService.getStudentsByMinAge(age));
     }
 
+    /** Students who are not enrolled in any class (placement / registration queue). */
+    @GetMapping("/not-enrolled-in-class")
+    public ResponseEntity<?> getStudentsNotEnrolledInAnyClass() {
+        return ResponseEntity.status(200).body(studentService.getStudentsNotEnrolledInAnyClass());
+    }
+
     @GetMapping("/student-by-class/{classId}")
     public ResponseEntity<?> getStudentsByClass(@PathVariable String classId) {
         if (classService.getClassById(classId) == null) {
@@ -92,8 +98,9 @@ public class StudentController {
         if (classService.getClassById(classId) == null) {
             return ResponseEntity.status(400).body(new ApiResponse("Class not found"));
         }
-        studentService.addClassToStudent(studentId, classId);
-        classService.addStudentToClass(classId, studentId);
+        if (!studentService.addClassToStudent(studentId, classId)) {
+            return ResponseEntity.status(400).body(new ApiResponse("Student not found"));
+        }
         return ResponseEntity.status(200).body(new ApiResponse("Class added to student"));
     }
 
@@ -109,7 +116,6 @@ public class StudentController {
         if (!removed) {
             return ResponseEntity.status(400).body(new ApiResponse("Student is not in this class "));
         }
-        classService.removeStudentFromClass(classId, studentId);
         return ResponseEntity.status(200).body(new ApiResponse("Class removed from student"));
     }
 }

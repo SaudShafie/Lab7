@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,16 +21,7 @@ public class Teacher {
     @NotNull
     @Min(0)
     private double salary;
-    private ArrayList<String> sectionsId = new ArrayList<>();
 
-    public ArrayList<String> getSectionsId() {
-        if (sectionsId==null)sectionsId=new ArrayList<>();
-
-        return sectionsId;
-    }
-
-    public void addSectionsId(String id) {
-        if (sectionsId==null)sectionsId=new ArrayList<>();
-        sectionsId.add(id);
-    }
+    /** Owning side: at most one section per teacher. */
+    private String sectionId;
 }

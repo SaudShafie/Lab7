@@ -103,8 +103,9 @@ public class ClassController {
         if (classService.getClassById(classId) == null) {
             return ResponseEntity.status(400).body(new ApiResponse("Class not found"));
         }
-        classService.addStudentToClass(classId, studentId);
-        studentService.addClassToStudent(studentId, classId);
+        if (!studentService.addClassToStudent(studentId, classId)) {
+            return ResponseEntity.status(400).body(new ApiResponse("Student not found"));
+        }
         return ResponseEntity.status(200).body(new ApiResponse("Student added to class"));
     }
 
@@ -116,11 +117,10 @@ public class ClassController {
         if (classService.getClassById(classId) == null) {
             return ResponseEntity.status(400).body(new ApiResponse("Class not found"));
         }
-        boolean removed = classService.removeStudentFromClass(classId, studentId);
+        boolean removed = studentService.removeClassFromStudent(studentId, classId);
         if (!removed) {
             return ResponseEntity.status(400).body(new ApiResponse("student is not in class " ));
         }
-        studentService.removeClassFromStudent(studentId, classId);
         return ResponseEntity.status(200).body(new ApiResponse("Student removed from class"));
     }
 
@@ -130,6 +130,7 @@ public class ClassController {
         if (schoolClass == null) {
             return ResponseEntity.status(400).body(new ApiResponse("Class not found"));
         }
-        return ResponseEntity.status(200).body(new ApiResponse(schoolClass.getStudentCount()+""));
+        int count = studentService.countStudentsInClass(classId);
+        return ResponseEntity.status(200).body(new ApiResponse(count + ""));
     }
 }

@@ -6,6 +6,7 @@ import org.example.lab7.Service.ClassService;
 import org.example.lab7.Service.SchoolConnectionService;
 import org.example.lab7.Service.StudentService;
 import org.example.lab7.Service.SubjectService;
+import org.example.lab7.dto.SectionOverviewDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +29,10 @@ public class SchoolConnectionController {
         if (classService.getClassById(classId) == null) {
             return ResponseEntity.status(400).body(new ApiResponse("Class not found " ));
         }
-        schoolConnectionService.enrollStudentInClass(studentId, classId);
-
+        boolean ok = schoolConnectionService.enrollStudentInClass(studentId, classId);
+        if (!ok) {
+            return ResponseEntity.status(400).body(new ApiResponse("Enrollment failed"));
+        }
         return ResponseEntity.status(200).body(new ApiResponse("Student enrolled in class"));
     }
 
@@ -41,8 +44,10 @@ public class SchoolConnectionController {
         if (subjectService.getSubjectById(subjectId) == null) {
             return ResponseEntity.status(400).body(new ApiResponse("Subject not found "));
         }
-        schoolConnectionService.assignSubjectToStudent(subjectId, studentId);
-
+        boolean ok = schoolConnectionService.assignSubjectToStudent(subjectId, studentId);
+        if (!ok) {
+            return ResponseEntity.status(400).body(new ApiResponse("Assignment failed"));
+        }
         return ResponseEntity.status(200).body(new ApiResponse("Subject assigned to student"));
     }
 
@@ -56,5 +61,17 @@ public class SchoolConnectionController {
             return ResponseEntity.status(400).body(new ApiResponse("Invalid subjectName (it can not be a blank or null)"));
         }
         return ResponseEntity.status(200).body(new ApiResponse("Class subject name updated"));
+    }
+
+    /**
+     * One request for a section’s snapshot: section row, enrolled student (if any), assigned teacher (if any).
+     */
+    @GetMapping("/section-overview/{sectionId}")
+    public ResponseEntity<?> getSectionOverview(@PathVariable String sectionId) {
+        SectionOverviewDto overview = schoolConnectionService.getSectionOverview(sectionId);
+        if (overview == null) {
+            return ResponseEntity.status(400).body(new ApiResponse("Section not found"));
+        }
+        return ResponseEntity.status(200).body(overview);
     }
 }

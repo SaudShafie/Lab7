@@ -10,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-
 @RestController
 @RequestMapping("/api/v1/sections")
 @RequiredArgsConstructor
@@ -75,7 +73,11 @@ public class SectionController {
         if (studentService.getStudentById(studentId) == null) {
             return ResponseEntity.status(400).body(new ApiResponse("Student not found"));
         }
-        return ResponseEntity.status(200).body(sectionService.getSectionsByStudentId(studentId));
+        var sections = sectionService.getSectionsByStudentId(studentId);
+        if (sections.isEmpty()) {
+            return ResponseEntity.status(400).body(new ApiResponse("No sections for this student found"));
+        }
+        return ResponseEntity.status(200).body(sections);
     }
 
     @PutMapping("/add-student-to-section/{studentId}/{sectionId}")

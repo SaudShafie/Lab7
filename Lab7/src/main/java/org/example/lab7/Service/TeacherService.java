@@ -64,21 +64,37 @@ public class TeacherService {
     public ArrayList<Teacher> getTeachersBySectionId(String sectionId) {
         ArrayList<Teacher> result = new ArrayList<>();
         for (Teacher teacher : teachers) {
-            if (teacher.getSectionsId().contains(sectionId)) {
+            if (java.util.Objects.equals(teacher.getSectionId(), sectionId)) {
                 result.add(teacher);
             }
         }
         return result;
     }
 
+    /** Teachers not assigned to any section (staffing follow-up). */
+    public ArrayList<Teacher> getTeachersWithoutSection() {
+        ArrayList<Teacher> result = new ArrayList<>();
+        for (Teacher teacher : teachers) {
+            String sid = teacher.getSectionId();
+            if (sid == null || sid.isBlank()) {
+                result.add(teacher);
+            }
+        }
+        return result;
+    }
+
+    /** Teacher owns {@link Teacher#getSectionId()}; at most one teacher per section. */
     public boolean addSectionToTeacher(String teacherId, String sectionId) {
         Teacher teacher = getTeacherById(teacherId);
         if (teacher == null) {
             return false;
         }
-        if (!teacher.getSectionsId().contains(sectionId)) {
-            teacher.addSectionsId(sectionId);
+        for (Teacher t : teachers) {
+            if (java.util.Objects.equals(t.getSectionId(), sectionId) && !t.getId().equals(teacherId)) {
+                t.setSectionId(null);
+            }
         }
+        teacher.setSectionId(sectionId);
         return true;
     }
 
@@ -87,6 +103,18 @@ public class TeacherService {
         if (teacher == null) {
             return false;
         }
-        return teacher.getSectionsId().remove(sectionId);
+        if (!java.util.Objects.equals(teacher.getSectionId(), sectionId)) {
+            return false;
+        }
+        teacher.setSectionId(null);
+        return true;
+    }
+
+    public void clearSectionIdReferences(String sectionId) {
+        for (Teacher t : teachers) {
+            if (java.util.Objects.equals(t.getSectionId(), sectionId)) {
+                t.setSectionId(null);
+            }
+        }
     }
 }

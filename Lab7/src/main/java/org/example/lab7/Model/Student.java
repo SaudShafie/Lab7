@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,31 +19,9 @@ public class Student {
     @Size(min = 4)
     private String name;
     @NotNull
-    @Min(value = 7,message = "Student should be over 7")
+    @Min(value = 7, message = "Student should be over 7")
     private int age;
 
-    private ArrayList<String> subjectsId = new ArrayList<>();
-    private ArrayList<String> classesId = new ArrayList<>();
-
-    public void addSubjectsId(String id) {
-        if(subjectsId==null)subjectsId=new ArrayList<>();
-        subjectsId.add(id);
-    }
-
-    public ArrayList<String> getClassesId() {
-        if (classesId==null)classesId=new ArrayList<>();
-
-        return classesId;
-    }
-
-    public ArrayList<String> getSubjectsId() {
-        if(subjectsId==null)subjectsId=new ArrayList<>();
-
-        return subjectsId;
-    }
-
-    public void addClassesId(String id) {
-        if (classesId==null)classesId=new ArrayList<>();
-        classesId.add(id);
-    }
+    /** Owning side: at most one class per student. */
+    private String classId;
 }
